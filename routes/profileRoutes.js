@@ -1,7 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { createOrUpdateProfile } = require('../controllers/profileController');
-const authenticateToken = require('../middleware/auth');
+const profileController = require("../controllers/profileController");
+router.put("/:id", profileController.updateUserProfile); // /api/profile/:id
 
-router.post('/profile', authenticateToken, createOrUpdateProfile);
+router.get("/:id", profileController.getUserProfile); // /api/profile/:id
+
 module.exports = router;

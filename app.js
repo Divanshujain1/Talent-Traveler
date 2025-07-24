@@ -5,10 +5,14 @@ const dotenv = require('dotenv');
 const authRoutes = require('./routes/authRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const jobRoutes = require('./routes/jobRoutes');
+const userRoutes = require('./routes/userRoutes');
+const bidRoutes = require('./routes/bidRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
+
+
 
 // Initialize dotenv
 dotenv.config();
-
 const app = express();
 
 // Middleware
@@ -17,8 +21,13 @@ app.use(express.json()); // Parse JSON request bodies
 
 // Routes
 app.use('/api', authRoutes);     // /api/signup, /api/login
-app.use('/api', profileRoutes);  // /api/profile
-app.use('/api', jobRoutes);   // Uncomment when job routes ready
+
+app.use('/api/jobs', jobRoutes);
+app.use('/api/profile', profileRoutes); // ✅ Profile routes mounted here
+app.use('/api/bids', bidRoutes);  // bid routes
+app.use('/api/users', userRoutes);
+app.use('/api/reviews', reviewRoutes);
+
 
 // Test route
 app.get('/', (req, res) => {
