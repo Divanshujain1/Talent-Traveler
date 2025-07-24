@@ -1,46 +1,92 @@
-import React, { useState } from "react";
-import { auth, provider, signInWithPopup } from "../firebase.js";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { signInWithPopup } from "firebase/auth";
+import { auth, provider } from "../firebase";
+import { isAuthenticated } from "../utils/auth";
 
-export default function LoginPage() {
-  const [name, setname] = useState("");
+export default function SigninPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
   const navigate = useNavigate();
 
-  const handleGoogleLogin = async () => {
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate("/UserRoleSelection");
+    }
+  }, [navigate]);
+
+  const handleGoogleSignin = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
+      const userData = {
+        name: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+      };
+
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("isSignnedIn", "true");
+
+      alert("Google Signin successful!");
+      navigate("/UserRoleSelection");
+    } catch (error) {
+      console.error("Google login error:", error);
+      alert("Google login failed. Try again.");
+    }
+  };
+
+  const handleSignin = () => {
+    if (username && password) {
+      const fakeUser = {
+        name: username,
+        email: username.includes("@") ? username : `${username}@example.com`,
+        photoURL: "/default-user.png", // or any default image
+      };
+
+      localStorage.setItem("user", JSON.stringify(fakeUser));
+      localStorage.setItem("isSignnedIn", "true");
+
+      alert("Fake Signin successful!");
+      navigate("/UserRoleSelection");
+    } else {
+      setError("Please enter both username and password.");
+    }
+  };
+
+  /* const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
       const idToken = await user.getIdToken();
 
-      const response = await fetch(
-        `${process.env.REACT_APP_BACKEND_URL}/api/google-login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${idToken}`,
-          },
-          body: JSON.stringify({
-            name: user.displayName,
-            email: user.email,
-            photoURL: user.photoURL,
-          }),
-        }
-      );
+      const backendURL =
+        process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+
+      const response = await fetch(`${backendURL}/api/google-login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          name: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+        }),
+      });
 
       const data = await response.json();
-      console.log("Backend response:", data);
-
       localStorage.setItem("user", JSON.stringify(data));
-    } catch (error) {
-      console.error("Google login failed:", error);
+      localStorage.setItem("isLoggedIn", "true");
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Google login failed:", err);
+      setError("Google login failed. Please try again.");
     }
   };
 
@@ -51,31 +97,39 @@ export default function LoginPage() {
     try {
       const response = await fetch("http://localhost:5000/api/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: username, password }),
       });
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Login failed");
 
+      localStorage.setItem("user", JSON.stringify(data));
+      localStorage.setItem("isLoggedIn", "true");
+
       alert("Login successful!");
+      navigate("/Dashboard");
     } catch (err) {
-      setError(err.message || "Unknown error");
+      setError(err.message || "Login failed.");
     } finally {
       setLoading(false);
     }
-  };
+  };*/
+
+ 
 
   return (
-    <section className="bg-gray-100 min-h-screen min-w-screen flex justify-center items-center">
-      <div className="bg-[#7d7de2ff] rounded-2xl flex max-w-3xl p-5 items-center">
+    <section className="bg-gray-900 min-h-screen flex justify-center items-center text-white">
+      <div className="bg-gray-800 rounded-2xl flex max-w-3xl p-5 items-center shadow-2xl">
         <div className="md:w-1/2 px-8">
-          <h2 className="font-bold text-3xl text-[#002D74]">Talent Traveler</h2>
-          <p className="text-sm mt-4 text-[#002D74]">
+          <h2 className="font-bold text-3xl text-white mb-4">SignIn</h2>
+          <div className="text-3xl font-bold text-white">
+            Talent<span className="text-indigo-400">Traveler</span>
+          </div>
+          <p className="text-sm mt-4 text-gray-300">
             Connect. Collaborate. Create.
           </p>
+
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -86,51 +140,53 @@ export default function LoginPage() {
             <input
               type="text"
               value={name}
-              className="p-2 mt-8 rounded-xl border"
               onChange={(e) => setname(e.target.value)}
+              className="p-2 mt-8 rounded-xl border bg-gray-700 text-white"
               placeholder="Name"
             />
             <input
               type="text"
               value={username}
-              className="p-2  rounded-xl border"
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Email or Username"
+              className="p-2 rounded-xl border bg-gray-700 text-white"
+              placeholder="Email"
             />
             <div className="relative">
               <input
-                placeholder="Password"
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="p-2 rounded-xl border w-full"
+                className="p-2 rounded-xl border w-full bg-gray-700 text-white"
+                placeholder="Password"
               />
               <span
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-gray-500"
+                className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-gray-400"
               >
                 {showPassword ? "🙈" : "👁️"}
               </span>
             </div>
 
             {error && <p className="text-red-500 text-sm">{error}</p>}
+
             <button
-              className="bg-[#002D74] text-white py-2 rounded-xl hover:scale-105 duration-300 hover:bg-[#206ab1] font-medium"
               type="submit"
+              disabled={loading}
+              className="bg-violet-600 text-white py-2 rounded-xl hover:scale-105 duration-300 hover:bg-violet-700 font-medium"
             >
-              {loading ? "Signing in..." : "Sign in"}
+              {loading ? "Signning in..." : "Signin"}
             </button>
           </form>
 
-          <div className="mt-6 items-center text-gray-100">
-            <hr className="border-gray-300" />
-            <p className="text-center text-sm">OR</p>
-            <hr className="border-gray-300" />
+          <div className="mt-6">
+            <hr className="border-gray-600" />
+            <p className="text-center text-sm text-gray-400">OR</p>
+            <hr className="border-gray-600" />
           </div>
 
           <button
-            className="bg-white border py-2 w-full rounded-xl mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 hover:bg-[#60a8bc4f] font-medium"
-            onClick={handleGoogleLogin}
+            onClick={handleGoogleSignin}
+            className="bg-white border py-2 w-full rounded-xl mt-5 flex justify-center items-center text-sm text-black hover:scale-105 duration-300 hover:bg-gray-200 font-medium"
           >
             <svg
               className="mr-3"
@@ -155,7 +211,7 @@ export default function LoginPage() {
                 d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"
               />
             </svg>
-            Sign in with Google
+            SignIn with Google
           </button>
         </div>
 
@@ -163,7 +219,11 @@ export default function LoginPage() {
           <img
             className="rounded-2xl max-h-[1600px]"
             src="/laptop.jpg"
-            alt="login form image"
+            alt="Signin"
+            onError={(e) =>
+              (e.target.src =
+                "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=700&q=80")
+            }
           />
         </div>
       </div>

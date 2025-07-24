@@ -166,25 +166,25 @@ const Footer = () => {
                     <li className="mt-[15px]">
                       <a
                         className="text-deutziawhite hover:text-deutziawhite/80 font-inter text-[15px] font-normal hover:font-semibold"
-                        href="/"
+                        href="./PostProject"
                       >
-                        Home
+                        PostProject
                       </a>
                     </li>
                     <li className="mt-[15px]">
                       <a
                         className="text-deutziawhite hover:text-deutziawhite/80 font-inter text-[15px] font-normal hover:font-semibold"
-                        href="/our-tutors"
+                        href="./ProjectListings"
                       >
-                        News
+                        Project Listings
                       </a>
                     </li>
                     <li className="mt-[15px]">
                       <a
                         className="text-deutziawhite hover:text-deutziawhite/80 font-inter text-[15px] font-normal hover:font-semibold"
-                        href="/become-a-tutor"
+                        href="./Dashboard"
                       >
-                        Contact
+                        Dashboard
                       </a>
                     </li>
                     <li className="mt-[15px]">

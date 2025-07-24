@@ -11,14 +11,14 @@ const HeroSection = () => {
   // 👇 Auto-redirect logged-in users to Dashboard on page load
   useEffect(() => {
     if (isAuthenticated()) {
-      navigate("/Dashboard");
+      navigate("/ProjectListings");
     }
   }, [navigate]);
 
   // 👇 These buttons are for not-logged-in users only
   const handleGetStarted = () => {
     if (isAuthenticated()) {
-      navigate("/Dashboard");
+      navigate("/ProjectListings");
     }
     else {
       navigate("/LoginPage");
@@ -28,7 +28,7 @@ const HeroSection = () => {
 
   const handleSignin = () => {
     if (isAuthenticated()) {
-      navigate("/Dashboard");
+      navigate("/ProjectListings");
     }
     else {
       navigate("/Signin");

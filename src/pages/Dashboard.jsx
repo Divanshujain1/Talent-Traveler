@@ -1,237 +1,189 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { isAuthenticated } from "../utils/auth";
-import Footer from "../components/Footer";
+import React from "react";
 
-const Dashboard = () => {
-  const navigate = useNavigate();
-
-  const [data, setData] = useState({
-    earnings: 0,
-    salesPercent: 0,
-    revenue: 0,
-    todaySales: 0,
-    socialStats: {
-      youtube: { growth: "1/8 REVX", views: "12.4K" },
-      facebook: { growth: "4/5 26.9K", engagement: "8.2%" },
-      twitter: { growth: "-6/10 6.9K", impressions: "24.1K" },
-    },
-    traffic: {
-      direct: 0,
-      social: 0,
-      referral: 0,
-      bounce: 0,
-      internet: 0,
-    },
-  });
-
-  useEffect(() => {
-    if (isAuthenticated()) {
-      navigate("/LoginPage");
-      return;
-    }
-
-    const fetchData = async () => {
-      try {
-        const token = localStorage.getItem("userToken");
-        if (!token) throw new Error("No token found");
-
-        const response = await fetch(
-          "http://localhost:5000/api/dashboard-data",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!response.ok) throw new Error("Server Error");
-        const json = await response.json();
-
-        setData((prev) => ({
-          earnings: json.earnings || 0,
-          salesPercent: json.salesPercent || 0,
-          revenue: json.revenue || 0,
-          todaySales: json.todaySales || 0,
-          socialStats: {
-            youtube: json.socialStats?.youtube || prev.socialStats.youtube,
-            facebook: json.socialStats?.facebook || prev.socialStats.facebook,
-            twitter: json.socialStats?.twitter || prev.socialStats.twitter,
-          },
-          traffic: {
-            direct: json.traffic?.direct || 0,
-            social: json.traffic?.social || 0,
-            referral: json.traffic?.referral || 0,
-            bounce: json.traffic?.bounce || 0,
-            internet: json.traffic?.internet || 0,
-          },
-        }));
-      } catch (err) {
-        console.error("Failed to fetch dashboard data:", err.message);
-      }
-    };
-
-    fetchData();
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("userToken");
-    navigate("/LoginPage");
-  };
-
+export default function FreelancerDashboard() {
   return (
     <>
-      <header className="flex justify-between items-center mb-8 animate-fadeIn">
-        <h1 className="text-3xl font-bold text-indigo-700">Talent Traveler</h1>
-        <div className="flex items-center space-x-4">
-          <button className="p-2 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 relative">
-            <i className="fas fa-bell" />
-            <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500 pulse" />
+      <meta charSet="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Freelancer Dashboard</title>
+      <link
+        href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
+        rel="stylesheet"
+      />
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+          :root {
+              --header-height: 4rem;
+              --sidebar-width: 240px;
+          }
+          @keyframes slideDown {
+              from { transform: translateY(-100%); opacity: 0; }
+              to { transform: translateY(0); opacity: 1; }
+          }
+          @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+          }
+          @keyframes slideUp {
+              from { transform: translateY(20px); opacity: 0; }
+              to { transform: translateY(0); opacity: 1; }
+          }
+          .animate-slide-down { animation: slideDown 0.5s ease-out; }
+          .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+          .animate-slide-up { animation: slideUp 0.5s ease-out forwards; }
+        `,
+        }}
+      />
+      <div className="overlay fixed inset-0 bg-black/50 z-40 hidden opacity-0 transition-opacity duration-300" />
+      <header className="fixed w-full bg-gray-900 text-white z-50 shadow-lg animate-slide-down">
+        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between h-16">
+          <button className="mobile-menu-button p-2 lg:hidden">
+            <span className="material-icons-outlined text-2xl">menu</span>
           </button>
-          <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold cursor-pointer">
-            SG
+          <div className="text-xl font-bold text-white">
+            Talent<span className="text-indigo-400">Traveler</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="material-icons-outlined p-2 text-2xl cursor-pointer hover:text-indigo-400 transition-transform duration-300 hover:scale-110 hidden md:block">
+              search
+            </span>
+            <span className="material-icons-outlined p-2 text-2xl cursor-pointer hover:text-indigo-400 transition-transform duration-300 hover:scale-110 hidden md:block">
+              notifications
+            </span>
+            <img
+              className="w-10 h-10 rounded-full transition-transform duration-300 hover:scale-110 object-cover"
+              src="https://i.pinimg.com/564x/de/0f/3d/de0f3d06d2c6dbf29a888cf78e4c0323.jpg"
+              alt="Profile"
+            />
           </div>
         </div>
       </header>
 
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 text-white mb-8 shadow-lg card-hover animate-fadeIn">
-        <h2 className="text-lg font-medium mb-1">All Earnings</h2>
-        <p className="text-3xl font-bold mb-4">${data.earnings}</p>
-        <div className="flex justify-between items-center">
-          <span className="text-indigo-100">IDX changes on profit</span>
-          <span className="bg-white text-indigo-600 px-3 py-1 rounded-full text-sm font-medium">
-            +3.2%
-          </span>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 card-hover animate-fadeIn">
-          <h3 className="text-lg font-medium text-gray-700 mb-4">
-            Sales Per Day
-          </h3>
-          <div className="flex justify-between items-end">
-            <div>
-              <p className="text-2xl font-bold text-gray-800">
-                {data.salesPercent}%
-              </p>
-              <p className="text-green-500 text-sm font-medium">
-                +1.2% from yesterday
-              </p>
-            </div>
-            <div className="bg-green-100 p-3 rounded-lg">
-              <i className="fas fa-chart-line text-green-600 text-xl" />
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 card-hover animate-fadeIn">
-          <h3 className="text-lg font-medium text-gray-700 mb-4">Revenue</h3>
-          <div className="flex justify-between items-end">
-            <div>
-              <p className="text-2xl font-bold text-gray-800">
-                ${data.revenue}
-              </p>
-              <p className="text-gray-500 text-sm">
-                {data.todaySales} Today Sales
-              </p>
-            </div>
-            <div className="bg-blue-100 p-3 rounded-lg">
-              <i className="fas fa-shopping-bag text-blue-600 text-xl" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8 card-hover animate-fadeIn">
-        <h3 className="text-lg font-medium text-gray-700 mb-4">
-          Social Media Performance
-        </h3>
-        <div className="space-y-4">
-          {["youtube", "facebook", "twitter"].map((platform) => (
-            <div
-              key={platform}
-              className={`flex justify-between items-center p-3 ${
-                platform === "youtube"
-                  ? "bg-red-50"
-                  : platform === "facebook"
-                  ? "bg-blue-50"
-                  : "bg-sky-50"
-              } rounded-lg hover:scale-[1.01] hover:shadow transition duration-300`}
+      <div className="pt-16 max-w-7xl mx-auto flex text-white">
+        <aside className="sidebar fixed lg:static w-[240px] bg-gray-800 h-[calc(100vh-4rem)] lg:h-auto transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-45 overflow-y-auto p-4">
+          <div className="bg-gray-900 rounded-xl shadow-lg mb-6 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+            <a
+              href="#"
+              className="flex items-center text-gray-300 hover:text-indigo-400 py-4 transition-all duration-300 hover:translate-x-1"
             >
-              <div className="flex items-center space-x-3">
-                <div
-                  className={`p-2 rounded-lg ${
-                    platform === "youtube"
-                      ? "bg-red-100"
-                      : platform === "facebook"
-                      ? "bg-blue-100"
-                      : "bg-sky-100"
-                  }`}
-                >
-                  <i
-                    className={`fab fa-${platform} ${
-                      platform === "youtube"
-                        ? "text-red-600"
-                        : platform === "facebook"
-                        ? "text-blue-600"
-                        : "text-sky-500"
-                    }`}
-                  />
-                </div>
-                <span className="font-medium capitalize">{platform}</span>
-              </div>
-              <div className="text-right">
-                <p className="font-medium">
-                  {data.socialStats[platform].growth}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {platform === "youtube"
-                    ? `Views: ${data.socialStats[platform].views}`
-                    : platform === "facebook"
-                    ? `Engagement: ${data.socialStats[platform].engagement}`
-                    : `Impressions: ${data.socialStats[platform].impressions}`}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+              <span className="material-icons-outlined mr-2">dashboard</span>
+              Dashboard
+              <span className="material-icons-outlined ml-auto">
+                keyboard_arrow_right
+              </span>
+            </a>
+            <a
+              href="#"
+              className="flex items-center text-gray-300 hover:text-indigo-400 py-4 transition-all duration-300 hover:translate-x-1"
+            >
+              <span className="material-icons-outlined mr-2">work</span>
+              My Projects
+              <span className="material-icons-outlined ml-auto">
+                keyboard_arrow_right
+              </span>
+            </a>
+            <a
+              href="#"
+              className="flex items-center text-gray-300 hover:text-indigo-400 py-4 transition-all duration-300 hover:translate-x-1"
+            >
+              <span className="material-icons-outlined mr-2">payments</span>
+              Earnings
+              <span className="material-icons-outlined ml-auto">
+                keyboard_arrow_right
+              </span>
+            </a>
+          </div>
+          <div className="bg-gray-900 rounded-xl shadow-lg p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+            <a
+              href="#"
+              className="flex items-center text-gray-300 hover:text-indigo-400 py-4 transition-all duration-300 hover:translate-x-1"
+            >
+              <span className="material-icons-outlined mr-2">face</span>
+              Profile
+              <span className="material-icons-outlined ml-auto">
+                keyboard_arrow_right
+              </span>
+            </a>
+            <a
+              href="#"
+              className="flex items-center text-gray-300 hover:text-indigo-400 py-4 transition-all duration-300 hover:translate-x-1"
+            >
+              <span className="material-icons-outlined mr-2">settings</span>
+              Settings
+              <span className="material-icons-outlined ml-auto">
+                keyboard_arrow_right
+              </span>
+            </a>
+            <a
+              href="#"
+              className="flex items-center text-gray-300 hover:text-indigo-400 py-4 transition-all duration-300 hover:translate-x-1"
+            >
+              <span className="material-icons-outlined mr-2">
+                power_settings_new
+              </span>
+              Log out
+              <span className="material-icons-outlined ml-auto">
+                keyboard_arrow_right
+              </span>
+            </a>
+          </div>
+        </aside>
 
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 card-hover animate-fadeIn">
-        <h3 className="text-lg font-medium text-gray-700 mb-4">
-          Traffic Sources
-        </h3>
-        <div className="space-y-3">
-          {Object.entries(data.traffic).map(([label, value]) => (
-            <div key={label} className="flex items-center justify-between">
-              <span className="w-24 font-medium capitalize">{label}</span>
-              <div className="flex-1 mx-4">
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                  <div
-                    className={`progress-bar h-2.5 rounded-full ${
-                      label === "direct"
-                        ? "bg-indigo-600"
-                        : label === "social"
-                        ? "bg-blue-500"
-                        : label === "referral"
-                        ? "bg-green-500"
-                        : label === "bounce"
-                        ? "bg-yellow-500"
-                        : "bg-purple-500"
-                    }`}
-                    style={{ width: `${value}%` }}
-                  />
-                </div>
-              </div>
-              <span className="w-10 text-right font-medium">{value}%</span>
+        <main className="flex-1 p-4 bg-gray-950 min-h-screen">
+          <div className="flex flex-col lg:flex-row gap-4 mb-6">
+            <div className="flex-1 bg-gray-800 border border-gray-700 rounded-xl p-6 animate-fade-in">
+              <h2 className="text-4xl md:text-5xl text-indigo-400">
+                Total Earnings
+                <br />
+                <strong>₹1,45,000</strong>
+              </h2>
+              <span className="inline-block mt-8 px-8 py-2 rounded-full text-xl font-bold text-white bg-indigo-700">
+                This Month
+              </span>
             </div>
-          ))}
-        </div>
-      </div>
+            <div className="flex-1 bg-gray-800 border border-gray-700 rounded-xl p-6 animate-fade-in">
+              <h2 className="text-4xl md:text-5xl text-indigo-400">
+                Completed <br />
+                <strong>12 Projects</strong>
+              </h2>
+              <a
+                href="#"
+                className="inline-block mt-8 px-8 py-2 rounded-full text-xl font-bold text-white bg-blue-700 hover:bg-blue-800 transition-transform duration-300 hover:scale-105"
+              >
+                View Portfolio
+              </a>
+            </div>
+          </div>
 
-      <Footer />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div
+              className="bg-gray-800 rounded-xl shadow-lg p-6 h-64 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-slide-up"
+              style={{ animationDelay: "0.1s" }}
+            >
+              <h3 className="text-xl font-bold text-indigo-400">
+                Ongoing Projects: 3
+              </h3>
+            </div>
+            <div
+              className="bg-gray-800 rounded-xl shadow-lg p-6 h-64 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-slide-up"
+              style={{ animationDelay: "0.2s" }}
+            >
+              <h3 className="text-xl font-bold text-indigo-400">
+                Pending Payments: ₹12,000
+              </h3>
+            </div>
+            <div
+              className="bg-gray-800 rounded-xl shadow-lg p-6 h-64 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-slide-up"
+              style={{ animationDelay: "0.3s" }}
+            >
+              <h3 className="text-xl font-bold text-indigo-400">
+                Ratings: ★ 4.9/5
+              </h3>
+            </div>
+          </div>
+        </main>
+      </div>
     </>
   );
-};
-
-export default Dashboard;
+}
