@@ -1,15 +1,23 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const FreelancerProposal = () => {
   const [coverLetter, setCoverLetter] = useState("");
   const [price, setPrice] = useState("");
   const [durationInDays, setDurationInDays] = useState("");
 
+  const navigate = useNavigate();
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!coverLetter || !price || !durationInDays) {
-      alert("Please fill out all fields.");
+      Swal.fire({
+        icon: "error",
+        title: "Incomplete Form",
+        text: "Please fill out all fields before submitting.",
+      });
       return;
     }
 
@@ -21,8 +29,17 @@ const FreelancerProposal = () => {
 
     console.log("Submitted Proposal:", proposalData);
     // TODO: send this data to backend / Firebase etc.
-  };
 
+    Swal.fire({
+      icon: "success",
+      title: "Proposal Submitted!",
+      text: "Your proposal has been sent successfully.",
+      showConfirmButton: false,
+      timer: 1500,
+    }).then(() => {
+      navigate("/ProjectListings");
+    });
+  };
   return (
     <div className="container max-w-2xl mx-auto p-4 my-8">
       <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl p-6 md:p-10">
